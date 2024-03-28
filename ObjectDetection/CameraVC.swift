@@ -42,7 +42,7 @@ final class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
            
         videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         videoPreviewLayer?.videoGravity = .resizeAspectFill
-        videoPreviewLayer?.frame = view.layer.bounds
+        videoPreviewLayer?.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: view.bounds.height / 2)
         if let videoPreviewLayer = videoPreviewLayer {
             view.layer.addSublayer(videoPreviewLayer)
         }
