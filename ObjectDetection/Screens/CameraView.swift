@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  CameraView.swift
 //  ObjectDetection
 //
 //  Created by Mateusz Obłoza on 28/03/2024.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct CameraView: View {
     
     @State private var recognizedObjects: [String] = []
     
@@ -36,12 +36,11 @@ struct ContentView: View {
                 }
                 .padding()
             }
-            .navigationTitle("🕵🏻‍♂️ Rozpoznanie")
+            .navigationTitle("🕵🏻‍♂️ Rozpoznaj")
         }
     }
 }
 
 #Preview {
-    ContentView()
+    CameraView()
 }
-
