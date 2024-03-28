@@ -14,8 +14,7 @@ struct CameraView: View {
     var body: some View {
         NavigationView{
             VStack{
-                Rectangle()
-                    .frame(maxWidth: .infinity, maxHeight: 300)
+                CameraVCRepresentable(recognizedObjects: $recognizedObjects)
                 
                 Spacer()
                     .frame(height: 60)
