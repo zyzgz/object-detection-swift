@@ -15,7 +15,7 @@ struct CameraVCRepresentable: UIViewControllerRepresentable {
     
     func makeUIViewController(context: Context) -> CameraVC {
         let cameraViewController = CameraVC()
-        cameraViewController.delegate = context.coordinator
+        cameraViewController.cameraDelegate = context.coordinator
         return cameraViewController
     }
     
@@ -28,15 +28,17 @@ struct CameraVCRepresentable: UIViewControllerRepresentable {
     }
     
     class Coordinator: NSObject, CameraVCDelegate {
+        
         @Binding var recognizedObjects: [String]
         
         init(recognizedObjects: Binding<[String]>) {
             _recognizedObjects = recognizedObjects
         }
         
-        func captured(image: UIImage) {
+        func captured(image: CVPixelBuffer) {
             // Tutaj można użyć modelu Core ML do rozpoznania obiektów na obrazie
             // i zaktualizować recognizedObjects
+            print(image)
             recognizedObjects = ["Example Object 1", "Example Object 2"] // Przykładowe rozpoznane obiekty
         }
     }

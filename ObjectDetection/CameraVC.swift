@@ -5,56 +5,93 @@
 //  Created by Mateusz Obłoza on 28/03/2024.
 //
 
-import Foundation
-import AVFoundation
 import UIKit
+import AVFoundation
 
-protocol CameraVCDelegate: AnyObject {
-    func captured(image: UIImage)
+enum CameraError: String {
+    case invalidCameraAccess = "Brak dostępu do kamery. Sprawdź ustawienia prywatności."
+    case unableToCaptureInput = "Nie można przechwycić danych wejściowych z kamery."
+    case recognitionError = "Błąd rozpoznawania obiektu."
+    case invalidPreviewLayer = "Podgląd kamery jest nieprawidłowy."
 }
 
-// Ta klasa jest odpowiedzialna za zarządzanie przechwytywaniem obrazu z kamery i przekazywaniem go do delegata.
+protocol CameraVCDelegate: AnyObject {
+    func captured(image: CVPixelBuffer)
+    func cameraErrorOccurred(_ error: CameraError)
+}
 
-final class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
+final class CameraVC: UIViewController {
     
-    private var captureSession = AVCaptureSession()
-    private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
-    weak var delegate: CameraVCDelegate?
-       
+    let captureSession = AVCaptureSession()
+    var previewLayer: AVCaptureVideoPreviewLayer?
+    weak var cameraDelegate: CameraVCDelegate!
+    
+    init(cameraDelegate: CameraVCDelegate) {
+        super.init(nibName: nil, bundle: nil)
+        self.cameraDelegate = cameraDelegate
+    }
+    
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-           
-        guard let captureDevice = AVCaptureDevice.default(for: .video) else {
-            fatalError("Brak dostępu do kamery.")
-        }
-           
-        do {
-            let input = try AVCaptureDeviceInput(device: captureDevice)
-            captureSession.addInput(input)
-        } catch {
-            print(error)
+        setupCaptureSession()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        guard let previewLayer = previewLayer else {
+            cameraDelegate.cameraErrorOccurred(.invalidPreviewLayer)
             return
         }
-           
+        
+        previewLayer.frame = view.layer.bounds
+    }
+    
+    private func setupCaptureSession() {
+        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
+            cameraDelegate?.cameraErrorOccurred(.invalidCameraAccess)
+            return
+        }
+        
+        let videoInput: AVCaptureDeviceInput
+        
+        do {
+            try videoInput = AVCaptureDeviceInput(device: videoCaptureDevice)
+        } catch {
+            cameraDelegate?.cameraErrorOccurred(.unableToCaptureInput)
+            return
+        }
+        
+        if captureSession.canAddInput(videoInput) {
+            captureSession.addInput(videoInput)
+        } else {
+            cameraDelegate?.cameraErrorOccurred(.unableToCaptureInput)
+            return
+        }
+        
         let videoOutput = AVCaptureVideoDataOutput()
         videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue"))
         captureSession.addOutput(videoOutput)
-           
-        videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        videoPreviewLayer?.videoGravity = .resizeAspectFill
-        videoPreviewLayer?.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: view.bounds.height / 2)
-        if let videoPreviewLayer = videoPreviewLayer {
-            view.layer.addSublayer(videoPreviewLayer)
-        }
-           
+        
+        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        previewLayer!.videoGravity = .resizeAspectFill
+        view.layer.addSublayer(previewLayer!)
+        
         captureSession.startRunning()
     }
-       
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        let ciImage = CIImage(cvPixelBuffer: imageBuffer)
-        let uiImage = UIImage(ciImage: ciImage)
-        delegate?.captured(image: uiImage)
-    }
+    
 }
 
+extension CameraVC: AVCaptureVideoDataOutputSampleBufferDelegate {
+    
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+                cameraDelegate?.cameraErrorOccurred(.recognitionError)
+                return
+            }
+            
+            cameraDelegate?.captured(image: pixelBuffer)
+        }
+}
