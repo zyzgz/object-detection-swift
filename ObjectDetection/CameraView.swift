@@ -11,9 +11,12 @@ import CoreML
 
 struct CameraView: UIViewControllerRepresentable {
     
+    @Binding var recognizedObject: String
     let model: VNCoreMLModel
+    let confidenceThreshold: Float = 0.5
     
-    init() {
+    init(recognizedObject: Binding<String>) {
+        _recognizedObject = recognizedObject
         guard let resnet50Model = try? VNCoreMLModel(for: Resnet50(configuration: MLModelConfiguration()).model) else {
             fatalError("Failed to load ResNet50 model")
         }
@@ -21,7 +24,7 @@ struct CameraView: UIViewControllerRepresentable {
     }
     
     func makeCoordinator() -> Coordinator {
-        Coordinator(model: model)
+        Coordinator(cameraView: self)
     }
     
     func makeUIViewController(context: Context) -> CameraVC {
@@ -32,28 +35,28 @@ struct CameraView: UIViewControllerRepresentable {
     
     final class Coordinator: NSObject, CameraVCDelegate {
         
-        let model: VNCoreMLModel
-        let confidenceThreshold: Float = 0.5
-            
-        init(model: VNCoreMLModel) {
-            self.model = model
+        private let cameraView: CameraView
+    
+        init(cameraView: CameraView) {
+            self.cameraView = cameraView
         }
-        
         
         func captured(image: CVPixelBuffer) {
-            let request = VNCoreMLRequest(model: model) {
+            let request = VNCoreMLRequest(model: cameraView.model) {
                 (finishedReq, err) in
             
-            guard let results = finishedReq.results as? [VNClassificationObservation] else {
-                return
-            }
+                guard let results = finishedReq.results as? [VNClassificationObservation] else {
+                    return
+                }
                 
-            for observation in results {
-                if observation.confidence >= self.confidenceThreshold {
-                    print(observation.identifier, observation.confidence)
+                for observation in results {
+                    if observation.confidence >= self.cameraView.confidenceThreshold {
+                        DispatchQueue.main.async {
+                            self.cameraView.recognizedObject = observation.identifier
+                        }
+                    }
                 }
             }
-        }
             
             do {
                 try VNImageRequestHandler(cvPixelBuffer: image, options: [:]).perform([request])
@@ -69,5 +72,5 @@ struct CameraView: UIViewControllerRepresentable {
 }
 
 #Preview {
-    CameraView()
+    CameraView(recognizedObject: .constant("example object"))
 }
