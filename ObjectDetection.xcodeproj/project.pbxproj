@@ -58,12 +58,12 @@
 			isa = PBXGroup;
 			children = (
 				61E70FA72BB5D664007D2137 /* ContentView.swift */,
-				61E70FA52BB5D664007D2137 /* ObjectDetectionApp.swift */,
 				61E70FA92BB5D664007D2137 /* Assets.xcassets */,
 				61E70FAB2BB5D664007D2137 /* Preview Content */,
 				61B4D45F2BB604F90097F51C /* CameraVC.swift */,
 				61A0C02A2BBC98D600DAF17D /* CameraView.swift */,
 				61B687C12BD41F1A001A956D /* Resnet50.mlmodel */,
+				61E70FA52BB5D664007D2137 /* ObjectDetectionApp.swift */,
 			);
 			path = ObjectDetection;
 			sourceTree = "<group>";

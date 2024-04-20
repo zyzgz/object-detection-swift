@@ -31,7 +31,9 @@ struct CameraView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: CameraVC, context: Context) {}
     
     final class Coordinator: NSObject, CameraVCDelegate {
+        
         let model: VNCoreMLModel
+        let confidenceThreshold: Float = 0.5
             
         init(model: VNCoreMLModel) {
             self.model = model
@@ -45,13 +47,12 @@ struct CameraView: UIViewControllerRepresentable {
             guard let results = finishedReq.results as? [VNClassificationObservation] else {
                 return
             }
-            
-            guard let firstObservation = results.first else {
-                return
+                
+            for observation in results {
+                if observation.confidence >= self.confidenceThreshold {
+                    print(observation.identifier, observation.confidence)
+                }
             }
-            
-            print(firstObservation.identifier,
-                  firstObservation.confidence)
         }
             
             do {

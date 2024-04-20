@@ -9,8 +9,13 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        CameraView()
-            .frame(maxWidth: .infinity, maxHeight: 300)
+        NavigationView {
+            VStack {
+                CameraView()
+                    .frame(maxWidth: .infinity, maxHeight: 300)
+            }
+            .navigationTitle("🕵🏻‍♂️ Skaner")
+        }
     }
 }
 
