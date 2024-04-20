@@ -17,7 +17,7 @@ enum CameraError: String {
 
 protocol CameraVCDelegate: AnyObject {
     func captured(image: CVPixelBuffer)
-    func cameraErrorOccurred(_ error: CameraError)
+    func cameraErrorOccurred(_ error: CameraError)  
 }
 
 final class CameraVC: UIViewController {

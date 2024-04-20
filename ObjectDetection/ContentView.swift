@@ -11,13 +11,6 @@ struct ContentView: View {
     var body: some View {
         CameraView()
             .frame(maxWidth: .infinity, maxHeight: 300)
-//        TabView {
-//            CameraView()
-//                .tabItem { Label("Rozpoznaj", systemImage: "camera.viewfinder") }
-//            
-//            HistoryView()
-//                .tabItem { Label("Historia", systemImage: "clock.arrow.circlepath") }
-//        }
     }
 }
 

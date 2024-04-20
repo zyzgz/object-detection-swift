@@ -11,8 +11,17 @@ import CoreML
 
 struct CameraView: UIViewControllerRepresentable {
     
+    let model: VNCoreMLModel
+    
+    init() {
+        guard let resnet50Model = try? VNCoreMLModel(for: Resnet50(configuration: MLModelConfiguration()).model) else {
+            fatalError("Failed to load ResNet50 model")
+        }
+        self.model = resnet50Model
+    }
+    
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(model: model)
     }
     
     func makeUIViewController(context: Context) -> CameraVC {
@@ -22,11 +31,14 @@ struct CameraView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: CameraVC, context: Context) {}
     
     final class Coordinator: NSObject, CameraVCDelegate {
-        func captured(image: CVPixelBuffer) {
-            guard let model = try? VNCoreMLModel(for: Resnet50(configuration: MLModelConfiguration()).model) else {
-                        return
-            }
+        let model: VNCoreMLModel
             
+        init(model: VNCoreMLModel) {
+            self.model = model
+        }
+        
+        
+        func captured(image: CVPixelBuffer) {
             let request = VNCoreMLRequest(model: model) {
                 (finishedReq, err) in
             
