@@ -7,9 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6180154B2BD54D970053CD09 /* ObjectDetectionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6180154A2BD54D970053CD09 /* ObjectDetectionService.swift */; };
+		6180154E2BD54E7E0053CD09 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6180154D2BD54E7E0053CD09 /* Throttler.swift */; };
+		618015522BD5585D0053CD09 /* CustomARView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618015512BD5585D0053CD09 /* CustomARView.swift */; };
+		618015542BD6D0E60053CD09 /* CustomARViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618015532BD6D0E60053CD09 /* CustomARViewRepresentable.swift */; };
+		618015562BD6D3EF0053CD09 /*  BubbleNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618015552BD6D3EF0053CD09 /*  BubbleNode.swift */; };
 		61A0C02B2BBC98D600DAF17D /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A0C02A2BBC98D600DAF17D /* CameraView.swift */; };
 		61B4D4602BB604F90097F51C /* CameraVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B4D45F2BB604F90097F51C /* CameraVC.swift */; };
 		61B687C22BD41F1A001A956D /* Resnet50.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 61B687C12BD41F1A001A956D /* Resnet50.mlmodel */; };
+		61D867472BD96449004082C3 /* ARViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D867462BD96449004082C3 /* ARViewContainer.swift */; };
+		61D867492BD98256004082C3 /* YOLOv3Int8LUT.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 61D867482BD98256004082C3 /* YOLOv3Int8LUT.mlmodel */; };
+		61D8674B2BD984F9004082C3 /* YOLOv3.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 61D8674A2BD984F9004082C3 /* YOLOv3.mlmodel */; };
 		61E70FA62BB5D664007D2137 /* ObjectDetectionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E70FA52BB5D664007D2137 /* ObjectDetectionApp.swift */; };
 		61E70FA82BB5D664007D2137 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E70FA72BB5D664007D2137 /* ContentView.swift */; };
 		61E70FAA2BB5D664007D2137 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61E70FA92BB5D664007D2137 /* Assets.xcassets */; };
@@ -17,9 +25,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6180154A2BD54D970053CD09 /* ObjectDetectionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectDetectionService.swift; sourceTree = "<group>"; };
+		6180154D2BD54E7E0053CD09 /* Throttler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttler.swift; sourceTree = "<group>"; };
+		618015512BD5585D0053CD09 /* CustomARView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomARView.swift; sourceTree = "<group>"; };
+		618015532BD6D0E60053CD09 /* CustomARViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomARViewRepresentable.swift; sourceTree = "<group>"; };
+		618015552BD6D3EF0053CD09 /*  BubbleNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = " BubbleNode.swift"; sourceTree = "<group>"; };
 		61A0C02A2BBC98D600DAF17D /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		61B4D45F2BB604F90097F51C /* CameraVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraVC.swift; sourceTree = "<group>"; };
 		61B687C12BD41F1A001A956D /* Resnet50.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = Resnet50.mlmodel; path = ../../../Downloads/Resnet50.mlmodel; sourceTree = "<group>"; };
+		61D867462BD96449004082C3 /* ARViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARViewContainer.swift; sourceTree = "<group>"; };
+		61D867482BD98256004082C3 /* YOLOv3Int8LUT.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = YOLOv3Int8LUT.mlmodel; path = ../../../Downloads/YOLOv3Int8LUT.mlmodel; sourceTree = "<group>"; };
+		61D8674A2BD984F9004082C3 /* YOLOv3.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = YOLOv3.mlmodel; path = ../../../Downloads/YOLOv3.mlmodel; sourceTree = "<group>"; };
 		61E70FA22BB5D664007D2137 /* ObjectDetection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ObjectDetection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61E70FA52BB5D664007D2137 /* ObjectDetectionApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectDetectionApp.swift; sourceTree = "<group>"; };
 		61E70FA72BB5D664007D2137 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -38,6 +54,36 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		618015492BD54D840053CD09 /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				6180154A2BD54D970053CD09 /* ObjectDetectionService.swift */,
+				6180154D2BD54E7E0053CD09 /* Throttler.swift */,
+			);
+			path = Service;
+			sourceTree = "<group>";
+		};
+		618015572BD6D4080053CD09 /* CameraOD */ = {
+			isa = PBXGroup;
+			children = (
+				61A0C02A2BBC98D600DAF17D /* CameraView.swift */,
+				61B4D45F2BB604F90097F51C /* CameraVC.swift */,
+			);
+			path = CameraOD;
+			sourceTree = "<group>";
+		};
+		618015582BD6D4250053CD09 /* AR */ = {
+			isa = PBXGroup;
+			children = (
+				618015492BD54D840053CD09 /* Service */,
+				618015512BD5585D0053CD09 /* CustomARView.swift */,
+				618015532BD6D0E60053CD09 /* CustomARViewRepresentable.swift */,
+				618015552BD6D3EF0053CD09 /*  BubbleNode.swift */,
+				61D867462BD96449004082C3 /* ARViewContainer.swift */,
+			);
+			path = AR;
+			sourceTree = "<group>";
+		};
 		61E70F992BB5D664007D2137 = {
 			isa = PBXGroup;
 			children = (
@@ -57,13 +103,15 @@
 		61E70FA42BB5D664007D2137 /* ObjectDetection */ = {
 			isa = PBXGroup;
 			children = (
+				618015582BD6D4250053CD09 /* AR */,
+				618015572BD6D4080053CD09 /* CameraOD */,
 				61E70FA72BB5D664007D2137 /* ContentView.swift */,
-				61E70FA92BB5D664007D2137 /* Assets.xcassets */,
-				61E70FAB2BB5D664007D2137 /* Preview Content */,
-				61B4D45F2BB604F90097F51C /* CameraVC.swift */,
-				61A0C02A2BBC98D600DAF17D /* CameraView.swift */,
-				61B687C12BD41F1A001A956D /* Resnet50.mlmodel */,
 				61E70FA52BB5D664007D2137 /* ObjectDetectionApp.swift */,
+				61E70FAB2BB5D664007D2137 /* Preview Content */,
+				61E70FA92BB5D664007D2137 /* Assets.xcassets */,
+				61B687C12BD41F1A001A956D /* Resnet50.mlmodel */,
+				61D867482BD98256004082C3 /* YOLOv3Int8LUT.mlmodel */,
+				61D8674A2BD984F9004082C3 /* YOLOv3.mlmodel */,
 			);
 			path = ObjectDetection;
 			sourceTree = "<group>";
@@ -146,11 +194,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				618015522BD5585D0053CD09 /* CustomARView.swift in Sources */,
+				61D8674B2BD984F9004082C3 /* YOLOv3.mlmodel in Sources */,
 				61B687C22BD41F1A001A956D /* Resnet50.mlmodel in Sources */,
+				61D867472BD96449004082C3 /* ARViewContainer.swift in Sources */,
+				618015562BD6D3EF0053CD09 /*  BubbleNode.swift in Sources */,
 				61A0C02B2BBC98D600DAF17D /* CameraView.swift in Sources */,
+				6180154E2BD54E7E0053CD09 /* Throttler.swift in Sources */,
 				61B4D4602BB604F90097F51C /* CameraVC.swift in Sources */,
+				618015542BD6D0E60053CD09 /* CustomARViewRepresentable.swift in Sources */,
 				61E70FA82BB5D664007D2137 /* ContentView.swift in Sources */,
+				61D867492BD98256004082C3 /* YOLOv3Int8LUT.mlmodel in Sources */,
 				61E70FA62BB5D664007D2137 /* ObjectDetectionApp.swift in Sources */,
+				6180154B2BD54D970053CD09 /* ObjectDetectionService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
