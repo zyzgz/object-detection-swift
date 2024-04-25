@@ -104,14 +104,37 @@ struct ARViewContainer: UIViewRepresentable {
         }
         
         func rectOfInterest(for boundingBox: CGRect) -> CGRect? {
-            print("rectOfInterest")
-            
             guard let sceneView = sceneView else { return nil }
             return VNImageRectForNormalizedRect(boundingBox, Int(sceneView.bounds.width), Int(sceneView.bounds.height))
         }
         
         func addAnnotation(rectOfInterest rect: CGRect, text: String) {
-            print("addAnnotation")
+            let point = CGPoint(x: rect.midX, y: rect.midY)
+                   
+            let scnHitTestResults = sceneView?.hitTest(point,
+                                                    options: [SCNHitTestOption.searchMode: SCNHitTestSearchMode.all.rawValue])
+            guard !(scnHitTestResults?.contains(where: { $0.node.name == BubbleNode.name }) ?? false) else { return }
+                   
+            guard let raycastQuery = sceneView?.raycastQuery(from: point,
+                                                            allowing: .existingPlaneInfinite,
+                                                            alignment: .horizontal),
+            let raycastResult = sceneView?.session.raycast(raycastQuery).first else { return }
+            let position = SCNVector3(raycastResult.worldTransform.columns.3.x,
+                                      raycastResult.worldTransform.columns.3.y,
+                                      raycastResult.worldTransform.columns.3.z)
+
+            guard let cameraPosition = sceneView?.pointOfView?.position else { return }
+            let distance = (position - cameraPosition).length()
+            guard distance <= 0.5 else { return }
+                   
+            let bubbleNode = BubbleNode(text: text)
+            bubbleNode.worldPosition = position
+                   
+            sceneView?.prepare([bubbleNode]) { [weak self] success in
+                if success {
+                    self?.sceneView?.scene.rootNode.addChildNode(bubbleNode)
+                }
+            }
         }
         
         private func onSessionUpdate(for frame: ARFrame, trackingState: ARCamera.TrackingState) {
@@ -174,3 +197,20 @@ struct ARViewContainer: UIViewRepresentable {
     }
 }
 
+extension SCNVector3 {
+    func length() -> Float {
+        return sqrtf(x * x + y * y + z * z)
+    }
+}
+
+func -(l: SCNVector3, r: SCNVector3) -> SCNVector3 {
+    return SCNVector3Make(l.x - r.x, l.y - r.y, l.z - r.z)
+}
+
+func +(l: SCNVector3, r: SCNVector3) -> SCNVector3 {
+    return SCNVector3(l.x + r.x, l.y + r.y, l.z + r.z)
+}
+
+func /(l: SCNVector3, r: Float) -> SCNVector3 {
+    return SCNVector3(l.x / r, l.y / r, l.z / r)
+}
