@@ -9,11 +9,20 @@ import SwiftUI
 
 struct ContentView: View {
     
+    @State private var sessionMessage: String = "Looking for surfaces..."
+    
     var body: some View {
         NavigationView {
             VStack {
-                ARViewContainer()
-                           .edgesIgnoringSafeArea(.all)
+                ARViewContainer(sessionMessage: $sessionMessage)
+                    .edgesIgnoringSafeArea(.all)
+                
+                Text(sessionMessage)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.black.opacity(0.5))
+                    .cornerRadius(10)
+                    .padding(.bottom, 20)
             }
             .navigationTitle("🕵🏻‍♂️ Skaner")
         }

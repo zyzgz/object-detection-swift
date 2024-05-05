@@ -12,10 +12,11 @@ import AVKit
 
 struct ARViewContainer: UIViewRepresentable {
     
+    @Binding var sessionMessage: String
+    
     let objectDetectionService = ObjectDetectionService()
     let throttler = Throttler(minimumDelay: 1, queue: .global(qos: .userInteractive))
     var sceneView = ARSCNView()
-    var sessionInfoLabel = UILabel()
        
     func makeUIView(context: Context) -> ARSCNView {
         sceneView.delegate = context.coordinator
@@ -26,6 +27,8 @@ struct ARViewContainer: UIViewRepresentable {
         sceneView.debugOptions = [.showFeaturePoints]
            
         startSession()
+        
+        context.coordinator.sessionMessage = $sessionMessage.wrappedValue
        
         return sceneView
     }
@@ -54,10 +57,15 @@ struct ARViewContainer: UIViewRepresentable {
     }
        
     func makeCoordinator() -> Coordinator {
-        Coordinator(objectDetectionService: objectDetectionService, throttler: throttler, sceneView: sceneView)
+        Coordinator(objectDetectionService: objectDetectionService, 
+                    throttler: throttler,
+                    sceneView: sceneView,
+                    sessionMessage: $sessionMessage)
     }
        
     class Coordinator: NSObject, ARSCNViewDelegate, ARSessionDelegate {
+        
+        @Binding var sessionMessage: String
         
         let objectDetectionService: ObjectDetectionService
         let throttler: Throttler
@@ -65,10 +73,16 @@ struct ARViewContainer: UIViewRepresentable {
         var isLoopShouldContinue = false
         var lastLocation: SCNVector3?
 
-        init(objectDetectionService: ObjectDetectionService, throttler: Throttler, sceneView: ARSCNView) {
+        init(objectDetectionService: ObjectDetectionService,
+             throttler: Throttler,
+             sceneView: ARSCNView,
+             sessionMessage: Binding<String>) {
+            
             self.objectDetectionService = objectDetectionService
             self.throttler = throttler
             self.sceneView = sceneView
+            _sessionMessage = sessionMessage
+            
             super.init()
         }
         
@@ -144,19 +158,19 @@ struct ARViewContainer: UIViewRepresentable {
                
             switch trackingState {
             case .normal where frame.anchors.isEmpty:
-                message = "Move the device around to detect horizontal and vertical surfaces."
+                message = "Scan your surroundings."
                    
             case .notAvailable:
-                message = "Tracking unavailable."
+                message = "AR tracking unavailable."
                    
             case .limited(.excessiveMotion):
-                message = "Tracking limited - Move the device more slowly."
+                message = "Slow down your movement."
                    
             case .limited(.insufficientFeatures):
-                message = "Tracking limited - Point the device at an area with visible surface detail, or improve lighting conditions."
+                message = "Need more visible details."
                    
             case .limited(.initializing):
-                message = "Initializing AR session."
+                message = "Starting AR session..."
                    
             default:
                 message = ""
@@ -165,6 +179,10 @@ struct ARViewContainer: UIViewRepresentable {
             }
             
             print(message)
+            
+            DispatchQueue.main.async {
+                self.sessionMessage = message
+            }
         }
         
         func session(_ session: ARSession, cameraDidChangeTrackingState camera: ARCamera) {
