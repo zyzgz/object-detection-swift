@@ -9,11 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     
-//    @State private var recognizedObject = ""
-    
     var body: some View {
-//        ARViewContainer()
-//            .edgesIgnoringSafeArea(.all)
         NavigationView {
             VStack {
                 ARViewContainer()
