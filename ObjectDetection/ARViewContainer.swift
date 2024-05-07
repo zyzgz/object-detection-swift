@@ -23,7 +23,6 @@ struct ARViewContainer: UIViewRepresentable {
         sceneView.session.delegate = context.coordinator
         sceneView.scene = SCNScene()
         sceneView.autoenablesDefaultLighting = true
-        sceneView.showsStatistics = true
         sceneView.debugOptions = [.showFeaturePoints]
            
         startSession()
@@ -98,22 +97,50 @@ struct ARViewContainer: UIViewRepresentable {
         }
            
         func performDetection() {
-            guard let pixelBuffer = sceneView?.session.currentFrame?.capturedImage else { return }
+            guard let pixelBuffer = sceneView?.session.currentFrame?.capturedImage else {
+                  updateSessionMessage("Camera frame is unavailable.")
+                  return
+              }
             
             objectDetectionService.detect(on: .init(pixelBuffer: pixelBuffer)) { [weak self] result in
                 guard let self = self else { return }
                 
-                print("Result: ", result)
-                
                 switch result {
                     case .success(let response):
-                        if let rectOfInterest = self.rectOfInterest(for: response.boundingBox) {
-                            self.addAnnotation(rectOfInterest: rectOfInterest, text: response.classification)
-                        }
+                        self.handleSuccessfulDetection(response)
                     case .failure(let error):
-                        print("Detection error: ", error)
-                        break
+                        self.handleDetectionError(error)
                     }
+            }
+        }
+        
+        private func handleSuccessfulDetection(_ response: ObjectDetectionService.Response) {
+            if let rectOfInterest = rectOfInterest(for: response.boundingBox) {
+                addAnnotation(rectOfInterest: rectOfInterest, text: response.classification)
+                let confidencePercent = response.confidence * 100
+                let message = "\(response.classification) with \(String(format: "%.2f", confidencePercent))% confidence"
+                updateSessionMessage(message)
+            } else {
+                updateSessionMessage("Detected object could not be annotated.")
+            }
+        }
+        
+        private func handleDetectionError(_ error: Error) {
+            if let recognitionError = error as? RecognitionError {
+                switch recognitionError {
+                    case .invalidImageData:
+                        updateSessionMessage("Invalid image data provided.")
+                    case .resultIsEmpty:
+                        updateSessionMessage("No objects detected.")
+                    case .lowConfidence:
+                        updateSessionMessage("Confidence too low to display.")
+                    case .unexpectedError(let message):
+                        updateSessionMessage(message)
+                    default:
+                        updateSessionMessage("An unknown error occurred.")
+                }
+            } else {
+                updateSessionMessage("An error occurred: \(error.localizedDescription)")
             }
         }
         
@@ -124,62 +151,51 @@ struct ARViewContainer: UIViewRepresentable {
         
         func addAnnotation(rectOfInterest rect: CGRect, text: String) {
             let point = CGPoint(x: rect.midX, y: rect.midY)
-                   
-            let scnHitTestResults = sceneView?.hitTest(point,
-                                                    options: [SCNHitTestOption.searchMode: SCNHitTestSearchMode.all.rawValue])
-            guard !(scnHitTestResults?.contains(where: { $0.node.name == BubbleNode.name }) ?? false) else { return }
-                   
-            guard let raycastQuery = sceneView?.raycastQuery(from: point,
-                                                            allowing: .existingPlaneInfinite,
-                                                            alignment: .horizontal),
-            let raycastResult = sceneView?.session.raycast(raycastQuery).first else { return }
+            guard let sceneView = sceneView,
+                  let raycastQuery = sceneView.raycastQuery(from: point, allowing: .existingPlaneInfinite, alignment: .horizontal),
+                  let raycastResult = sceneView.session.raycast(raycastQuery).first,
+                  let cameraPosition = sceneView.pointOfView?.position else { return }
+
             let position = SCNVector3(raycastResult.worldTransform.columns.3.x,
                                       raycastResult.worldTransform.columns.3.y,
                                       raycastResult.worldTransform.columns.3.z)
-
-            guard let cameraPosition = sceneView?.pointOfView?.position else { return }
             let distance = (position - cameraPosition).length()
-            guard distance <= 0.5 else { return }
-                   
-            let bubbleNode = BubbleNode(text: text)
-            bubbleNode.worldPosition = position
-                   
-            sceneView?.prepare([bubbleNode]) { [weak self] success in
-                if success {
-                    self?.sceneView?.scene.rootNode.addChildNode(bubbleNode)
+            
+            if distance > 0.5 { return }
+
+            if !sceneView.isNode(named: BubbleNode.name, atPoint: point) {
+                let bubbleNode = BubbleNode(text: text)
+                bubbleNode.worldPosition = position
+                sceneView.prepare([bubbleNode]) { [weak self] success in
+                    if success {
+                        self?.sceneView?.scene.rootNode.addChildNode(bubbleNode)
+                    }
                 }
             }
         }
         
         private func onSessionUpdate(for frame: ARFrame, trackingState: ARCamera.TrackingState) {
-            isLoopShouldContinue = false
-
-            let message: String
-               
             switch trackingState {
             case .normal where frame.anchors.isEmpty:
-                message = "Scan your surroundings."
-                   
+                updateSessionMessage("Scan your surroundings.")
             case .notAvailable:
-                message = "AR tracking unavailable."
-                   
+                updateSessionMessage("AR tracking unavailable.")
             case .limited(.excessiveMotion):
-                message = "Slow down your movement."
-                   
+                updateSessionMessage("Slow down your movement.")
             case .limited(.insufficientFeatures):
-                message = "Need more visible details."
-                   
+                updateSessionMessage("Need more visible details.")
             case .limited(.initializing):
-                message = "Starting AR session..."
-                   
+                updateSessionMessage("Starting AR session...")
             default:
-                message = ""
+                updateSessionMessage("")
                 isLoopShouldContinue = true
                 loopObjectDetection()
             }
             
-            print(message)
-            
+            isLoopShouldContinue = false
+        }
+        
+        private func updateSessionMessage(_ message: String) {
             DispatchQueue.main.async {
                 self.sessionMessage = message
             }
@@ -231,4 +247,11 @@ func +(l: SCNVector3, r: SCNVector3) -> SCNVector3 {
 
 func /(l: SCNVector3, r: Float) -> SCNVector3 {
     return SCNVector3(l.x / r, l.y / r, l.z / r)
+}
+
+extension ARSCNView {
+    func isNode(named name: String, atPoint point: CGPoint) -> Bool {
+        let hitTestResults = self.hitTest(point, options: [SCNHitTestOption.searchMode: SCNHitTestSearchMode.all.rawValue])
+        return hitTestResults.contains(where: { $0.node.name == name })
+    }
 }

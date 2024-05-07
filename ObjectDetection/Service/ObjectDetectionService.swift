@@ -15,16 +15,14 @@ class ObjectDetectionService {
     let mlModel: VNCoreMLModel
     
     init() {
-//      TODO: przetestować dlaczego nie działa tamten model Resnet50, a YOLOv3 działa
-        guard let resnet50Model = try? VNCoreMLModel(for: YOLOv3(configuration: MLModelConfiguration()).model) else {
+        guard let model = try? VNCoreMLModel(for: YOLOv3(configuration: MLModelConfiguration()).model) else {
             fatalError("Failed to load ml model")
         }
-        self.mlModel = resnet50Model
+        self.mlModel = model
     }
     
     lazy var coreMLRequest: VNCoreMLRequest = {
-        return VNCoreMLRequest(model: mlModel,
-                               completionHandler: self.coreMlRequestHandler)
+        return VNCoreMLRequest(model: mlModel, completionHandler: self.coreMlRequestHandler)
     }()
     
     private var completion: ((Result<Response, Error>) -> Void)?
@@ -39,34 +37,37 @@ class ObjectDetectionService {
         do {
             try imageRequestHandler.perform([coreMLRequest])
         } catch {
-            self.complete(.failure(error))
+            let errorDetail = error.localizedDescription
+            let enhancedError = RecognitionError.unexpectedError("Failed to perform image request: \(errorDetail)")
+            self.complete(.failure(enhancedError))
             return
         }
     }
 }
 
 private extension ObjectDetectionService {
+    
     func coreMlRequestHandler(_ request: VNRequest?, error: Error?) {
         if let error = error {
-            complete(.failure(error))
+            let errorDetail = error.localizedDescription
+            complete(.failure(RecognitionError.unexpectedError("Error during ML request: \(errorDetail)")))
             return
         }
         
-        guard let request = request, let results = request.results as? [VNRecognizedObjectObservation] else {
+        guard let results = request?.results as? [VNRecognizedObjectObservation] else {
             complete(.failure(RecognitionError.resultIsEmpty))
             return
         }
         
         guard let result = results.first(where: { $0.confidence > 0.8 }),
-            let classification = result.labels.first else {
-                complete(.failure(RecognitionError.lowConfidence))
-                return
+              let classification = result.labels.first else {
+            complete(.failure(RecognitionError.lowConfidence))
+            return
         }
         
         let response = Response(boundingBox: result.boundingBox,
                                 classification: classification.identifier,
                                 confidence: classification.confidence)
-        
         complete(.success(response))
     }
     
@@ -76,12 +77,6 @@ private extension ObjectDetectionService {
             self.completion = nil
         }
     }
-}
-
-enum RecognitionError: Error {
-    case unableToInitializeCoreMLModel
-    case resultIsEmpty
-    case lowConfidence
 }
 
 extension ObjectDetectionService {
@@ -98,23 +93,19 @@ extension ObjectDetectionService {
 
 extension UIDevice {
     var exifOrientation: UInt32 {
-        let exifOrientation: DeviceOrientation
-        enum DeviceOrientation: UInt32 {
-            case top0ColLeft = 1
-            case top0ColRight = 2
-            case bottom0ColRight = 3
-            case bottom0ColLeft = 4
-            case left0ColTop = 5
-            case right0ColTop = 6
-            case right0ColBottom = 7
-            case left0ColBottom = 8
-        }
         switch orientation {
-        case .portraitUpsideDown: exifOrientation = .left0ColBottom
-        case .landscapeLeft: exifOrientation = .top0ColLeft
-        case .landscapeRight: exifOrientation = .bottom0ColRight
-        default: exifOrientation = .right0ColTop
+        case .portraitUpsideDown: return 8
+        case .landscapeLeft: return 1
+        case .landscapeRight: return 3
+        default: return 6
         }
-        return exifOrientation.rawValue
     }
+}
+
+enum RecognitionError: Error {
+    case unableToInitializeCoreMLModel
+    case invalidImageData
+    case resultIsEmpty
+    case lowConfidence
+    case unexpectedError(String)
 }
