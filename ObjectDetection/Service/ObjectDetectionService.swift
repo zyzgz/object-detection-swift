@@ -15,7 +15,7 @@ class ObjectDetectionService {
     let mlModel: VNCoreMLModel
     
     init() {
-        guard let model = try? VNCoreMLModel(for: YOLOv3(configuration: MLModelConfiguration()).model) else {
+        guard let model = try? VNCoreMLModel(for: YOLOv3Int8LUT(configuration: MLModelConfiguration()).model) else {
             fatalError("Failed to load ml model")
         }
         self.mlModel = model

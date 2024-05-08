@@ -100,28 +100,22 @@ struct ARViewContainer: UIViewRepresentable {
             guard let pixelBuffer = sceneView?.session.currentFrame?.capturedImage else {
                   updateSessionMessage("Camera frame is unavailable.")
                   return
-              }
+            }
             
             objectDetectionService.detect(on: .init(pixelBuffer: pixelBuffer)) { [weak self] result in
                 guard let self = self else { return }
                 
                 switch result {
                     case .success(let response):
-                        self.handleSuccessfulDetection(response)
+                        if let rectOfInterest = rectOfInterest(for: response.boundingBox) {
+                            let confidencePercent = response.confidence * 100
+                            let message = "\(response.classification) \(String(format: "%.2f", confidencePercent))%"
+                            addAnnotation(rectOfInterest: rectOfInterest, text: message)
+                        }
                     case .failure(let error):
-                        self.handleDetectionError(error)
+                        handleDetectionError(error)
+                        break
                     }
-            }
-        }
-        
-        private func handleSuccessfulDetection(_ response: ObjectDetectionService.Response) {
-            if let rectOfInterest = rectOfInterest(for: response.boundingBox) {
-                addAnnotation(rectOfInterest: rectOfInterest, text: response.classification)
-                let confidencePercent = response.confidence * 100
-                let message = "\(response.classification) with \(String(format: "%.2f", confidencePercent))% confidence"
-                updateSessionMessage(message)
-            } else {
-                updateSessionMessage("Detected object could not be annotated.")
             }
         }
         
@@ -163,8 +157,8 @@ struct ARViewContainer: UIViewRepresentable {
             
             if distance > 0.5 { return }
 
-            if !sceneView.isNode(named: BubbleNode.name, atPoint: point) {
-                let bubbleNode = BubbleNode(text: text)
+            if !sceneView.isNode(named: AnnotationNode.name, atPoint: point) {
+                let bubbleNode = AnnotationNode(text: text)
                 bubbleNode.worldPosition = position
                 sceneView.prepare([bubbleNode]) { [weak self] success in
                     if success {

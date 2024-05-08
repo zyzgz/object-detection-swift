@@ -24,7 +24,6 @@ struct ContentView: View {
                     .cornerRadius(10)
                     .padding(.bottom, 20)
             }
-            .navigationTitle("🕵🏻‍♂️ Skaner")
         }
     }
 }
