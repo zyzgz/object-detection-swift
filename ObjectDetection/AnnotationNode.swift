@@ -8,6 +8,7 @@
 import SceneKit
 
 class AnnotationNode: SCNNode {
+    
     static let name = String(describing: AnnotationNode.self)
     let annotationDepth: CGFloat = 0.1
     let hiddenGeometry = SCNSphere(radius: 0.15)
@@ -41,7 +42,7 @@ class AnnotationNode: SCNNode {
 
     private func setupSphereNode() {
         let sphere = SCNSphere(radius: 0.005)
-        sphere.firstMaterial?.diffuse.contents = UIColor.cyan
+        sphere.firstMaterial?.diffuse.contents = UIColor.systemBlue
         let sphereNode = SCNNode(geometry: sphere)
         addChildNode(sphereNode)
     }

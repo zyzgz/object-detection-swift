@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		6180154B2BD54D970053CD09 /* ObjectDetectionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6180154A2BD54D970053CD09 /* ObjectDetectionService.swift */; };
 		6180154E2BD54E7E0053CD09 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6180154D2BD54E7E0053CD09 /* Throttler.swift */; };
-		618015562BD6D3EF0053CD09 /*  BubbleNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618015552BD6D3EF0053CD09 /*  BubbleNode.swift */; };
+		618015562BD6D3EF0053CD09 /* AnnotationNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618015552BD6D3EF0053CD09 /* AnnotationNode.swift */; };
 		61B687C22BD41F1A001A956D /* Resnet50.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 61B687C12BD41F1A001A956D /* Resnet50.mlmodel */; };
 		61D867472BD96449004082C3 /* ARViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D867462BD96449004082C3 /* ARViewContainer.swift */; };
 		61D867492BD98256004082C3 /* YOLOv3Int8LUT.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 61D867482BD98256004082C3 /* YOLOv3Int8LUT.mlmodel */; };
@@ -18,12 +18,15 @@
 		61E70FA82BB5D664007D2137 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E70FA72BB5D664007D2137 /* ContentView.swift */; };
 		61E70FAA2BB5D664007D2137 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61E70FA92BB5D664007D2137 /* Assets.xcassets */; };
 		61E70FAD2BB5D664007D2137 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61E70FAC2BB5D664007D2137 /* Preview Assets.xcassets */; };
+		61FAB0E92BEBE1820013B4B2 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61FAB0E82BEBE1820013B4B2 /* HistoryView.swift */; };
+		61FAB0EB2BEC04180013B4B2 /* MessageOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61FAB0EA2BEC04180013B4B2 /* MessageOverlay.swift */; };
+		61FAB0EE2BEC05780013B4B2 /* ScannedObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61FAB0ED2BEC05780013B4B2 /* ScannedObject.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		6180154A2BD54D970053CD09 /* ObjectDetectionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectDetectionService.swift; sourceTree = "<group>"; };
 		6180154D2BD54E7E0053CD09 /* Throttler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttler.swift; sourceTree = "<group>"; };
-		618015552BD6D3EF0053CD09 /*  BubbleNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = " BubbleNode.swift"; sourceTree = "<group>"; };
+		618015552BD6D3EF0053CD09 /* AnnotationNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationNode.swift; sourceTree = "<group>"; };
 		61B687C12BD41F1A001A956D /* Resnet50.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = Resnet50.mlmodel; path = ../../../Downloads/Resnet50.mlmodel; sourceTree = "<group>"; };
 		61D867462BD96449004082C3 /* ARViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARViewContainer.swift; sourceTree = "<group>"; };
 		61D867482BD98256004082C3 /* YOLOv3Int8LUT.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = YOLOv3Int8LUT.mlmodel; path = ../../../Downloads/YOLOv3Int8LUT.mlmodel; sourceTree = "<group>"; };
@@ -33,6 +36,9 @@
 		61E70FA72BB5D664007D2137 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		61E70FA92BB5D664007D2137 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		61E70FAC2BB5D664007D2137 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		61FAB0E82BEBE1820013B4B2 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		61FAB0EA2BEC04180013B4B2 /* MessageOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageOverlay.swift; sourceTree = "<group>"; };
+		61FAB0ED2BEC05780013B4B2 /* ScannedObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannedObject.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,9 +80,12 @@
 		61E70FA42BB5D664007D2137 /* ObjectDetection */ = {
 			isa = PBXGroup;
 			children = (
+				61FAB0EC2BEC05670013B4B2 /* Models */,
 				618015492BD54D840053CD09 /* Service */,
-				618015552BD6D3EF0053CD09 /*  BubbleNode.swift */,
+				618015552BD6D3EF0053CD09 /* AnnotationNode.swift */,
 				61D867462BD96449004082C3 /* ARViewContainer.swift */,
+				61FAB0E82BEBE1820013B4B2 /* HistoryView.swift */,
+				61FAB0EA2BEC04180013B4B2 /* MessageOverlay.swift */,
 				61E70FA72BB5D664007D2137 /* ContentView.swift */,
 				61E70FA52BB5D664007D2137 /* ObjectDetectionApp.swift */,
 				61E70FAB2BB5D664007D2137 /* Preview Content */,
@@ -94,6 +103,14 @@
 				61E70FAC2BB5D664007D2137 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		61FAB0EC2BEC05670013B4B2 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				61FAB0ED2BEC05780013B4B2 /* ScannedObject.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -169,10 +186,13 @@
 				61D8674B2BD984F9004082C3 /* YOLOv3.mlmodel in Sources */,
 				61B687C22BD41F1A001A956D /* Resnet50.mlmodel in Sources */,
 				61D867472BD96449004082C3 /* ARViewContainer.swift in Sources */,
-				618015562BD6D3EF0053CD09 /*  BubbleNode.swift in Sources */,
+				61FAB0EB2BEC04180013B4B2 /* MessageOverlay.swift in Sources */,
+				618015562BD6D3EF0053CD09 /* AnnotationNode.swift in Sources */,
 				6180154E2BD54E7E0053CD09 /* Throttler.swift in Sources */,
 				61E70FA82BB5D664007D2137 /* ContentView.swift in Sources */,
 				61D867492BD98256004082C3 /* YOLOv3Int8LUT.mlmodel in Sources */,
+				61FAB0E92BEBE1820013B4B2 /* HistoryView.swift in Sources */,
+				61FAB0EE2BEC05780013B4B2 /* ScannedObject.swift in Sources */,
 				61E70FA62BB5D664007D2137 /* ObjectDetectionApp.swift in Sources */,
 				6180154B2BD54D970053CD09 /* ObjectDetectionService.swift in Sources */,
 			);

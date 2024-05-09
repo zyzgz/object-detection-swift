@@ -11,114 +11,145 @@ import SceneKit
 import AVKit
 
 struct ARViewContainer: UIViewRepresentable {
-    
+
     @Binding var sessionMessage: String
-    
+    @Binding var scannedObjects: [ScannedObject]
+    @Binding var isSessionActive: Bool
+
     let objectDetectionService = ObjectDetectionService()
     let throttler = Throttler(minimumDelay: 1, queue: .global(qos: .userInteractive))
     var sceneView = ARSCNView()
-       
+
     func makeUIView(context: Context) -> ARSCNView {
         sceneView.delegate = context.coordinator
         sceneView.session.delegate = context.coordinator
         sceneView.scene = SCNScene()
         sceneView.autoenablesDefaultLighting = true
         sceneView.debugOptions = [.showFeaturePoints]
-           
-        startSession()
-        
-        context.coordinator.sessionMessage = $sessionMessage.wrappedValue
-       
+
         return sceneView
     }
-       
-    func updateUIView(_ uiView: ARSCNView, context: Context) {}
-       
-       
+
+    func updateUIView(_ uiView: ARSCNView, context: Context) {
+        if isSessionActive != context.coordinator.cachedIsSessionActive {
+            manageSession()
+            context.coordinator.cachedIsSessionActive = isSessionActive
+        }
+    }
+
+    func manageSession() {
+        if isSessionActive {
+            startSession()
+        } else {
+            stopSession()
+        }
+    }
+
     func startSession(resetTracking: Bool = false) {
         guard ARWorldTrackingConfiguration.isSupported else {
             assertionFailure("ARKit is not supported")
             return
         }
-           
+
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = .horizontal
-           
+
         if resetTracking {
             sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
         } else {
             sceneView.session.run(configuration)
         }
     }
-       
+
     func stopSession() {
         sceneView.session.pause()
     }
-       
+
     func makeCoordinator() -> Coordinator {
-        Coordinator(objectDetectionService: objectDetectionService, 
+        Coordinator(objectDetectionService: objectDetectionService,
                     throttler: throttler,
                     sceneView: sceneView,
-                    sessionMessage: $sessionMessage)
+                    sessionMessage: $sessionMessage,
+                    scannedObjects: $scannedObjects,
+                    isSessionActive: $isSessionActive)
     }
-       
+
     class Coordinator: NSObject, ARSCNViewDelegate, ARSessionDelegate {
-        
+
         @Binding var sessionMessage: String
-        
+        @Binding var scannedObjects: [ScannedObject]
+        @Binding var isSessionActive: Bool
+
         let objectDetectionService: ObjectDetectionService
         let throttler: Throttler
         var sceneView: ARSCNView?
         var isLoopShouldContinue = false
         var lastLocation: SCNVector3?
+        var cachedIsSessionActive: Bool?
 
         init(objectDetectionService: ObjectDetectionService,
              throttler: Throttler,
              sceneView: ARSCNView,
-             sessionMessage: Binding<String>) {
-            
+             sessionMessage: Binding<String>,
+             scannedObjects: Binding<[ScannedObject]>,
+             isSessionActive: Binding<Bool>) {
             self.objectDetectionService = objectDetectionService
             self.throttler = throttler
             self.sceneView = sceneView
             _sessionMessage = sessionMessage
-            
+            _scannedObjects = scannedObjects
+            _isSessionActive = isSessionActive
+
             super.init()
         }
-        
+
         func loopObjectDetection() {
             throttler.throttle { [weak self] in
                 guard let self = self else { return }
-                
-                if self.isLoopShouldContinue {
+
+                if self.isLoopShouldContinue && self.isSessionActive {
                     self.performDetection()
                 }
                 self.loopObjectDetection()
             }
         }
-           
+
         func performDetection() {
             guard let pixelBuffer = sceneView?.session.currentFrame?.capturedImage else {
-                  updateSessionMessage("Camera frame is unavailable.")
-                  return
+                updateSessionMessage("Camera frame is unavailable.")
+                return
             }
-            
+
             objectDetectionService.detect(on: .init(pixelBuffer: pixelBuffer)) { [weak self] result in
                 guard let self = self else { return }
-                
+
                 switch result {
                     case .success(let response):
-                        if let rectOfInterest = rectOfInterest(for: response.boundingBox) {
-                            let confidencePercent = response.confidence * 100
-                            let message = "\(response.classification) \(String(format: "%.2f", confidencePercent))%"
-                            addAnnotation(rectOfInterest: rectOfInterest, text: message)
-                        }
+                        self.handleDetectionSuccess(response)
                     case .failure(let error):
-                        handleDetectionError(error)
+                        self.handleDetectionError(error)
                         break
-                    }
+                }
             }
         }
-        
+
+        private func handleDetectionSuccess(_ response: ObjectDetectionService.Response) {
+            if let rectOfInterest = rectOfInterest(for: response.boundingBox) {
+                let confidencePercent = response.confidence * 100
+                let text = "\(response.classification) \(String(format: "%.2f", confidencePercent))%"
+                addAnnotation(rectOfInterest: rectOfInterest, text: text)
+
+                let scannedObject = ScannedObject(
+                    classification: response.classification,
+                    confidence: confidencePercent,
+                    date: Date()
+                )
+
+                scannedObjects.append(scannedObject)
+                updateSessionMessage("")
+            }
+        }
+
         private func handleDetectionError(_ error: Error) {
             if let recognitionError = error as? RecognitionError {
                 switch recognitionError {
@@ -137,12 +168,12 @@ struct ARViewContainer: UIViewRepresentable {
                 updateSessionMessage("An error occurred: \(error.localizedDescription)")
             }
         }
-        
+
         func rectOfInterest(for boundingBox: CGRect) -> CGRect? {
             guard let sceneView = sceneView else { return nil }
             return VNImageRectForNormalizedRect(boundingBox, Int(sceneView.bounds.width), Int(sceneView.bounds.height))
         }
-        
+
         func addAnnotation(rectOfInterest rect: CGRect, text: String) {
             let point = CGPoint(x: rect.midX, y: rect.midY)
             guard let sceneView = sceneView,
@@ -154,7 +185,7 @@ struct ARViewContainer: UIViewRepresentable {
                                       raycastResult.worldTransform.columns.3.y,
                                       raycastResult.worldTransform.columns.3.z)
             let distance = (position - cameraPosition).length()
-            
+
             if distance > 0.5 { return }
 
             if !sceneView.isNode(named: AnnotationNode.name, atPoint: point) {
@@ -167,58 +198,58 @@ struct ARViewContainer: UIViewRepresentable {
                 }
             }
         }
-        
+
         private func onSessionUpdate(for frame: ARFrame, trackingState: ARCamera.TrackingState) {
-            switch trackingState {
-            case .normal where frame.anchors.isEmpty:
-                updateSessionMessage("Scan your surroundings.")
-            case .notAvailable:
-                updateSessionMessage("AR tracking unavailable.")
-            case .limited(.excessiveMotion):
-                updateSessionMessage("Slow down your movement.")
-            case .limited(.insufficientFeatures):
-                updateSessionMessage("Need more visible details.")
-            case .limited(.initializing):
-                updateSessionMessage("Starting AR session...")
-            default:
-                updateSessionMessage("")
-                isLoopShouldContinue = true
-                loopObjectDetection()
-            }
-            
             isLoopShouldContinue = false
+
+            switch trackingState {
+                case .normal where frame.anchors.isEmpty:
+                    updateSessionMessage("Move your device.")
+                case .notAvailable:
+                    updateSessionMessage("AR tracking unavailable.")
+                case .limited(.excessiveMotion):
+                    updateSessionMessage("Slow down your movement.")
+                case .limited(.insufficientFeatures):
+                    updateSessionMessage("Need more visible details.")
+                case .limited(.initializing):
+                    updateSessionMessage("Starting AR session...")
+                default:
+                    updateSessionMessage("")
+                    isLoopShouldContinue = true
+                    loopObjectDetection()
+            }
         }
-        
+
         private func updateSessionMessage(_ message: String) {
             DispatchQueue.main.async {
                 self.sessionMessage = message
             }
         }
-        
+
         func session(_ session: ARSession, cameraDidChangeTrackingState camera: ARCamera) {
             guard let frame = session.currentFrame else { return }
             onSessionUpdate(for: frame, trackingState: camera.trackingState)
         }
-        
+
         func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
             guard let frame = session.currentFrame else { return }
             onSessionUpdate(for: frame, trackingState: frame.camera.trackingState)
         }
-        
+
         func session(_ session: ARSession, didRemove anchors: [ARAnchor]) {
             guard let frame = session.currentFrame else { return }
             onSessionUpdate(for: frame, trackingState: frame.camera.trackingState)
         }
-        
+
         func session(_ session: ARSession, didUpdate frame: ARFrame) {
             let transform = SCNMatrix4(frame.camera.transform)
             let orientation = SCNVector3(-transform.m31, -transform.m32, transform.m33)
             let location = SCNVector3(transform.m41, transform.m42, transform.m43)
             let currentPositionOfCamera = orientation + location
-            
+
             if let lastLocation = lastLocation {
                 let speed = (lastLocation - currentPositionOfCamera).length()
-                isLoopShouldContinue = speed < 0.0025
+                isLoopShouldContinue = speed < 0.0025 && isSessionActive
             }
             lastLocation = currentPositionOfCamera
         }

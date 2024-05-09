@@ -10,19 +10,44 @@ import SwiftUI
 struct ContentView: View {
     
     @State private var sessionMessage: String = "Looking for surfaces..."
-    
+    @State private var scannedObjects: [ScannedObject] = []
+    @State private var isARSessionActive = true
+
     var body: some View {
         NavigationView {
-            VStack {
-                ARViewContainer(sessionMessage: $sessionMessage)
+            ZStack(alignment: .top) {
+                ARViewContainer(sessionMessage: $sessionMessage,
+                                scannedObjects: $scannedObjects,
+                                isSessionActive: $isARSessionActive)
                     .edgesIgnoringSafeArea(.all)
-                
-                Text(sessionMessage)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.black.opacity(0.5))
-                    .cornerRadius(10)
-                    .padding(.bottom, 20)
+                    .onAppear {
+                        isARSessionActive = true
+                    }
+                    .onDisappear {
+                        isARSessionActive = false
+                    }
+
+                if !sessionMessage.isEmpty {
+                    withAnimation {
+                        MessageOverlay(message: sessionMessage)
+                            .padding(.top, 25)
+                            .transition(.opacity)
+                    }
+                }
+
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        NavigationLink(destination: HistoryView(scannedObjects: scannedObjects)) {
+                            Image(systemName: "clock.fill")
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .foregroundColor(.white)
+                        }
+                        .padding()
+                    }
+                }
             }
         }
     }
@@ -31,4 +56,6 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+
+
 
