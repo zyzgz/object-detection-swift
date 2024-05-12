@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		612CD6C22BF0CCBC004500E1 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 612CD6C12BF0CCBC004500E1 /* DetailView.swift */; };
+		612CD6C42BF0D4B6004500E1 /* HistoryCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 612CD6C32BF0D4B6004500E1 /* HistoryCellView.swift */; };
 		6180154B2BD54D970053CD09 /* ObjectDetectionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6180154A2BD54D970053CD09 /* ObjectDetectionService.swift */; };
 		6180154E2BD54E7E0053CD09 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6180154D2BD54E7E0053CD09 /* Throttler.swift */; };
 		618015562BD6D3EF0053CD09 /* AnnotationNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618015552BD6D3EF0053CD09 /* AnnotationNode.swift */; };
@@ -24,6 +26,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		612CD6C12BF0CCBC004500E1 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
+		612CD6C32BF0D4B6004500E1 /* HistoryCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryCellView.swift; sourceTree = "<group>"; };
 		6180154A2BD54D970053CD09 /* ObjectDetectionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectDetectionService.swift; sourceTree = "<group>"; };
 		6180154D2BD54E7E0053CD09 /* Throttler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttler.swift; sourceTree = "<group>"; };
 		618015552BD6D3EF0053CD09 /* AnnotationNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationNode.swift; sourceTree = "<group>"; };
@@ -84,6 +88,8 @@
 				618015492BD54D840053CD09 /* Service */,
 				618015552BD6D3EF0053CD09 /* AnnotationNode.swift */,
 				61D867462BD96449004082C3 /* ARViewContainer.swift */,
+				612CD6C12BF0CCBC004500E1 /* DetailView.swift */,
+				612CD6C32BF0D4B6004500E1 /* HistoryCellView.swift */,
 				61FAB0E82BEBE1820013B4B2 /* HistoryView.swift */,
 				61FAB0EA2BEC04180013B4B2 /* MessageOverlay.swift */,
 				61E70FA72BB5D664007D2137 /* ContentView.swift */,
@@ -190,7 +196,9 @@
 				618015562BD6D3EF0053CD09 /* AnnotationNode.swift in Sources */,
 				6180154E2BD54E7E0053CD09 /* Throttler.swift in Sources */,
 				61E70FA82BB5D664007D2137 /* ContentView.swift in Sources */,
+				612CD6C22BF0CCBC004500E1 /* DetailView.swift in Sources */,
 				61D867492BD98256004082C3 /* YOLOv3Int8LUT.mlmodel in Sources */,
+				612CD6C42BF0D4B6004500E1 /* HistoryCellView.swift in Sources */,
 				61FAB0E92BEBE1820013B4B2 /* HistoryView.swift in Sources */,
 				61FAB0EE2BEC05780013B4B2 /* ScannedObject.swift in Sources */,
 				61E70FA62BB5D664007D2137 /* ObjectDetectionApp.swift in Sources */,

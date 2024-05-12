@@ -21,13 +21,15 @@ class Throttler {
 
     func throttle(_ block: @escaping () -> Void) {
         workItem.cancel()
-        
+
         workItem = DispatchWorkItem { [weak self] in
             self?.previousRun = Date()
             block()
         }
 
-        let delay = previousRun.timeIntervalSinceNow > minimumDelay ? 0 : minimumDelay
-        queue.asyncAfter(deadline: .now() + Double(delay), execute: workItem)
+        let now = Date()
+        let delay = max(previousRun.addingTimeInterval(minimumDelay).timeIntervalSince(now), 0)
+        queue.asyncAfter(deadline: .now() + delay, execute: workItem)
     }
+
 }

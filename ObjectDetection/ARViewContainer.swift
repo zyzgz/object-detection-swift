@@ -141,7 +141,11 @@ struct ARViewContainer: UIViewRepresentable {
                 let annotationAdded = addAnnotation(rectOfInterest: rectOfInterest, text: text)
 
                 if annotationAdded {
-                    let scannedObject = ScannedObject(classification: response.classification, confidence: confidencePercent, date: Date())
+                    let thumbnail = extractObjectImage(from: response.boundingBox)
+                    let scannedObject = ScannedObject(classification: response.classification,
+                                                      confidence: confidencePercent,
+                                                      date: Date(),
+                                                      thumbnail: thumbnail)
                     scannedObjects.append(scannedObject)
                     updateSessionMessage("")
                 }
@@ -198,6 +202,42 @@ struct ARViewContainer: UIViewRepresentable {
             }
             return false
         }
+        
+        func extractObjectImage(from boundingBox: CGRect) -> UIImage? {
+            guard let pixelBuffer = sceneView?.session.currentFrame?.capturedImage else {
+                return nil
+            }
+            
+            guard let fullImage = pixelBufferToUIImage(pixelBuffer, rotate: 270) else {
+                return nil
+            }
+            
+            let width = CGFloat(CVPixelBufferGetWidth(pixelBuffer))
+            let height = CGFloat(CVPixelBufferGetHeight(pixelBuffer))
+            let rect = VNImageRectForNormalizedRect(boundingBox, Int(width), Int(height))
+            
+            guard let croppedCGImage = fullImage.cgImage?.cropping(to: rect) else {
+                return nil
+            }
+            
+            return UIImage(cgImage: croppedCGImage)
+        }
+
+        func pixelBufferToUIImage(_ pixelBuffer: CVPixelBuffer, rotate degree: Double) -> UIImage? {
+            let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+
+            var transform = CGAffineTransform.identity
+            transform = transform.rotated(by: CGFloat(degree * .pi / 180))
+
+            let rotatedCIImage = ciImage.transformed(by: transform)
+
+            let context = CIContext(options: nil)
+            if let cgImage = context.createCGImage(rotatedCIImage, from: rotatedCIImage.extent) {
+                return UIImage(cgImage: cgImage)
+            }
+            return nil
+        }
+
 
         private func onSessionUpdate(for frame: ARFrame, trackingState: ARCamera.TrackingState) {
             isLoopShouldContinue = false

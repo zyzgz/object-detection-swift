@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import UIKit
 
 struct ScannedObject: Identifiable {
     let id = UUID()
     let classification: String
     let confidence: Float
     let date: Date
+    let thumbnail: UIImage?
 }

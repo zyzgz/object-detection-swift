@@ -24,6 +24,8 @@ struct MessageOverlay: View {
                 .fill(Color.black.opacity(0.8))
                 .shadow(radius: 10)
         )
+        .transition(.slide)
+        .animation(.easeInOut, value: message)
     }
 }
 
