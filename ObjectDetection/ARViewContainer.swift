@@ -137,16 +137,14 @@ struct ARViewContainer: UIViewRepresentable {
             if let rectOfInterest = rectOfInterest(for: response.boundingBox) {
                 let confidencePercent = response.confidence * 100
                 let text = "\(response.classification) \(String(format: "%.2f", confidencePercent))%"
-                addAnnotation(rectOfInterest: rectOfInterest, text: text)
+                
+                let annotationAdded = addAnnotation(rectOfInterest: rectOfInterest, text: text)
 
-                let scannedObject = ScannedObject(
-                    classification: response.classification,
-                    confidence: confidencePercent,
-                    date: Date()
-                )
-
-                scannedObjects.append(scannedObject)
-                updateSessionMessage("")
+                if annotationAdded {
+                    let scannedObject = ScannedObject(classification: response.classification, confidence: confidencePercent, date: Date())
+                    scannedObjects.append(scannedObject)
+                    updateSessionMessage("")
+                }
             }
         }
 
@@ -174,19 +172,19 @@ struct ARViewContainer: UIViewRepresentable {
             return VNImageRectForNormalizedRect(boundingBox, Int(sceneView.bounds.width), Int(sceneView.bounds.height))
         }
 
-        func addAnnotation(rectOfInterest rect: CGRect, text: String) {
+        func addAnnotation(rectOfInterest rect: CGRect, text: String) -> Bool {
             let point = CGPoint(x: rect.midX, y: rect.midY)
             guard let sceneView = sceneView,
                   let raycastQuery = sceneView.raycastQuery(from: point, allowing: .existingPlaneInfinite, alignment: .horizontal),
                   let raycastResult = sceneView.session.raycast(raycastQuery).first,
-                  let cameraPosition = sceneView.pointOfView?.position else { return }
+                  let cameraPosition = sceneView.pointOfView?.position else { return false }
 
             let position = SCNVector3(raycastResult.worldTransform.columns.3.x,
                                       raycastResult.worldTransform.columns.3.y,
                                       raycastResult.worldTransform.columns.3.z)
             let distance = (position - cameraPosition).length()
 
-            if distance > 0.5 { return }
+            if distance > 0.5 { return false }
 
             if !sceneView.isNode(named: AnnotationNode.name, atPoint: point) {
                 let bubbleNode = AnnotationNode(text: text)
@@ -196,7 +194,9 @@ struct ARViewContainer: UIViewRepresentable {
                         self?.sceneView?.scene.rootNode.addChildNode(bubbleNode)
                     }
                 }
+                return true
             }
+            return false
         }
 
         private func onSessionUpdate(for frame: ARFrame, trackingState: ARCamera.TrackingState) {
