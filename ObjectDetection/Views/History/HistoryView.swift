@@ -46,7 +46,7 @@ struct HistoryView: View {
             }
         }
         .sheet(item: $selectedObject, content: { item in
-            DetailView(object: item)
+            HistoryDetailView(object: item)
         })
     }
 

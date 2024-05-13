@@ -35,9 +35,3 @@ struct HistoryCellView: View {
     }
 }
 
-extension UIImage {
-    static func from(data: Data?) -> UIImage? {
-        guard let imageData = data else { return nil }
-        return UIImage(data: imageData)
-    }
-}

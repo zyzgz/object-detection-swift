@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Throttler {
+class ThrottlerService {
     private var workItem: DispatchWorkItem = DispatchWorkItem { }
     private var previousRun: Date = Date.distantPast
     private let queue: DispatchQueue
