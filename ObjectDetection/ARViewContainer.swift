@@ -9,11 +9,12 @@ import SwiftUI
 import ARKit
 import SceneKit
 import AVKit
+import CoreData
 
 struct ARViewContainer: UIViewRepresentable {
 
+    @Environment(\.managedObjectContext) var managedObjectContext
     @Binding var sessionMessage: String
-    @Binding var scannedObjects: [ScannedObject]
     @Binding var isSessionActive: Bool
 
     let objectDetectionService = ObjectDetectionService()
@@ -70,15 +71,16 @@ struct ARViewContainer: UIViewRepresentable {
                     throttler: throttler,
                     sceneView: sceneView,
                     sessionMessage: $sessionMessage,
-                    scannedObjects: $scannedObjects,
-                    isSessionActive: $isSessionActive)
+                    isSessionActive: $isSessionActive,
+                    managedObjectContext: managedObjectContext)
     }
 
     class Coordinator: NSObject, ARSCNViewDelegate, ARSessionDelegate {
 
         @Binding var sessionMessage: String
-        @Binding var scannedObjects: [ScannedObject]
         @Binding var isSessionActive: Bool
+
+        var managedObjectContext: NSManagedObjectContext
 
         let objectDetectionService: ObjectDetectionService
         let throttler: Throttler
@@ -91,13 +93,13 @@ struct ARViewContainer: UIViewRepresentable {
              throttler: Throttler,
              sceneView: ARSCNView,
              sessionMessage: Binding<String>,
-             scannedObjects: Binding<[ScannedObject]>,
-             isSessionActive: Binding<Bool>) {
+             isSessionActive: Binding<Bool>,
+             managedObjectContext: NSManagedObjectContext) {
             self.objectDetectionService = objectDetectionService
             self.throttler = throttler
             self.sceneView = sceneView
+            self.managedObjectContext = managedObjectContext
             _sessionMessage = sessionMessage
-            _scannedObjects = scannedObjects
             _isSessionActive = isSessionActive
 
             super.init()
@@ -141,12 +143,10 @@ struct ARViewContainer: UIViewRepresentable {
                 let annotationAdded = addAnnotation(rectOfInterest: rectOfInterest, text: text)
 
                 if annotationAdded {
-                    let thumbnail = extractObjectImage(from: response.boundingBox)
-                    let scannedObject = ScannedObject(classification: response.classification,
+                    DataController().addScannedObject(classification: response.classification, 
                                                       confidence: confidencePercent,
-                                                      date: Date(),
-                                                      thumbnail: thumbnail)
-                    scannedObjects.append(scannedObject)
+                                                      thumbnail: extractObjectImage(from: response.boundingBox)!,
+                                                      context: managedObjectContext)
                     updateSessionMessage("")
                 }
             }
@@ -222,6 +222,7 @@ struct ARViewContainer: UIViewRepresentable {
             
             return UIImage(cgImage: croppedCGImage)
         }
+
 
         func pixelBufferToUIImage(_ pixelBuffer: CVPixelBuffer, rotate degree: Double) -> UIImage? {
             let ciImage = CIImage(cvPixelBuffer: pixelBuffer)

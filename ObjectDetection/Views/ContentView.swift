@@ -10,14 +10,12 @@ import SwiftUI
 struct ContentView: View {
     
     @State private var sessionMessage: String = "Looking for surfaces..."
-    @State private var scannedObjects: [ScannedObject] = []
     @State private var isARSessionActive = true
 
     var body: some View {
         NavigationView {
             ZStack(alignment: .top) {
                 ARViewContainer(sessionMessage: $sessionMessage,
-                                scannedObjects: $scannedObjects,
                                 isSessionActive: $isARSessionActive)
                     .edgesIgnoringSafeArea(.all)
                     .onAppear {
@@ -39,7 +37,7 @@ struct ContentView: View {
                     Spacer()
                     HStack {
                         Spacer()
-                        NavigationLink(destination: HistoryView(scannedObjects: scannedObjects)) {
+                        NavigationLink(destination: HistoryView()) {
                             Image(systemName: "clock.fill")
                                 .resizable()
                                 .frame(width: 40, height: 40)

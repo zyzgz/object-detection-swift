@@ -14,8 +14,8 @@ struct DetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
-                if let thumbnail = object.thumbnail {
-                    Image(uiImage: thumbnail)
+                if let thumbnailImage = UIImage.from(data: object.thumbnail) {
+                    Image(uiImage: thumbnailImage)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(width: UIScreen.main.bounds.width, height: 300)
@@ -27,7 +27,7 @@ struct DetailView: View {
                         .font(.headline)
                         .padding(.top)
 
-                    Text(object.classification)
+                    Text(object.classification ?? "Unknown")
                         .font(.title2)
                         .fontWeight(.semibold)
                         .padding(.bottom)
@@ -43,10 +43,17 @@ struct DetailView: View {
                     Text("Date")
                         .font(.headline)
 
-                    Text(object.date, style: .date)
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .padding(.bottom)
+                    if let date = object.date {
+                        Text(date, style: .date)
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .padding(.bottom)
+                    } else {
+                        Text("Unknown date")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .padding(.bottom)
+                    }
                 }
                 .padding(.horizontal)
             }
@@ -56,10 +63,3 @@ struct DetailView: View {
     }
 }
 
-
-#Preview {
-    DetailView(object: ScannedObject(classification: "Cat",
-                                     confidence: 85.7,
-                                     date: Date(),
-                                     thumbnail: UIImage(named: "placeholder")))
-}

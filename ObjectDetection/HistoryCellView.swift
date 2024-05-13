@@ -13,20 +13,20 @@ struct HistoryCellView: View {
     
     var body: some View {
         HStack {
-            if let thumbnail = object.thumbnail {
-                Image(uiImage: thumbnail)
+            if let thumbnailImage = UIImage.from(data: object.thumbnail) {
+                Image(uiImage: thumbnailImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 120, height: 90)
                     .cornerRadius(8)
             }
-
+            
             VStack(alignment: .leading, spacing: 5) {
-                Text(object.classification)
+                Text(object.classification!)
                     .font(.headline)
                 Text("\(String(format: "%.2f", object.confidence))%")
                     .font(.subheadline)
-                Text(object.date, style: .date)
+                Text(object.date!, style: .date)
                     .font(.footnote)
                     .foregroundColor(.gray)
             }
@@ -35,9 +35,9 @@ struct HistoryCellView: View {
     }
 }
 
-#Preview {
-    HistoryCellView(object: ScannedObject(classification: "Cat",
-                                  confidence: 85.7,
-                                  date: Date(),
-                                  thumbnail: UIImage(named: "placeholder")))
+extension UIImage {
+    static func from(data: Data?) -> UIImage? {
+        guard let imageData = data else { return nil }
+        return UIImage(data: imageData)
+    }
 }
