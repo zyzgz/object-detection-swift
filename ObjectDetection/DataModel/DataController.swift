@@ -10,33 +10,59 @@ import CoreData
 import UIKit
 
 class DataController: ObservableObject {
-    let container = NSPersistentContainer(name: "ScanItModel")
+    
+    static let shared = DataController()
+    let container: NSPersistentContainer
+    
+    @Published var errorMessage: String?
+    
+    var viewContext: NSManagedObjectContext {
+        return container.viewContext
+    }
     
     init() {
+        container = NSPersistentContainer(name: "ScanItModel")
+        
         container.loadPersistentStores { desc, error in
             if let error = error {
-                print("Failed to load the data \(error.localizedDescription)")
+                self.errorMessage = "Failed to load the data \(error.localizedDescription)"
             }
         }
     }
     
-    func save(context: NSManagedObjectContext) {
+    func save() {
         do {
-            try context.save()
-            print("data saved")
+            try viewContext.save()
         } catch {
-            print("We could not save the data...")
+            self.errorMessage = "We could not save the data..."
         }
     }
     
-    func addScannedObject(classification: String, confidence: Float, thumbnail: UIImage, context: NSManagedObjectContext) {
-        let scannedObject = ScannedObject(context: context)
+    func addScannedObject(classification: String, confidence: Float, thumbnail: UIImage) {
+        let scannedObject = ScannedObject(context: viewContext)
         scannedObject.id = UUID()
         scannedObject.date = Date()
         scannedObject.classification = classification
         scannedObject.confidence = confidence
         scannedObject.thumbnail = thumbnail.jpegData(compressionQuality: 1.0)
         
-        save(context: context)
+        save()
     }
+    
+    func fetchScannedObjects() -> [ScannedObject] {
+         let fetchRequest: NSFetchRequest<ScannedObject> = ScannedObject.fetchRequest()
+         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \ScannedObject.date, ascending: false)]
+         
+         do {
+             return try viewContext.fetch(fetchRequest)
+         } catch {
+             self.errorMessage = "Failed to fetch scanned objects: \(error.localizedDescription)"
+             return []
+         }
+     }
+     
+     func deleteObject(object: ScannedObject) {
+         viewContext.delete(object)
+         save()
+     }
 }

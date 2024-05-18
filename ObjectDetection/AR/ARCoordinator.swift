@@ -16,8 +16,6 @@ class ARCoordinator: NSObject, ARSCNViewDelegate, ARSessionDelegate {
     @Binding var sessionMessage: String
     @Binding var isSessionActive: Bool
 
-    var managedObjectContext: NSManagedObjectContext
-
     let objectDetectionService: ObjectDetectionService
     let throttlerService: ThrottlerService
     var sceneView: ARSCNView?
@@ -29,12 +27,10 @@ class ARCoordinator: NSObject, ARSCNViewDelegate, ARSessionDelegate {
          throttlerService: ThrottlerService,
          sceneView: ARSCNView,
          sessionMessage: Binding<String>,
-         isSessionActive: Binding<Bool>,
-         managedObjectContext: NSManagedObjectContext) {
+         isSessionActive: Binding<Bool>) {
         self.objectDetectionService = objectDetectionService
         self.throttlerService = throttlerService
         self.sceneView = sceneView
-        self.managedObjectContext = managedObjectContext
         _sessionMessage = sessionMessage
         _isSessionActive = isSessionActive
 
@@ -81,8 +77,7 @@ class ARCoordinator: NSObject, ARSCNViewDelegate, ARSessionDelegate {
             if annotationAdded {
                 DataController().addScannedObject(classification: response.classification,
                                                   confidence: confidencePercent,
-                                                  thumbnail: extractObjectImage(from: response.boundingBox)!,
-                                                  context: managedObjectContext)
+                                                  thumbnail: extractObjectImage(from: response.boundingBox)!)
                 updateSessionMessage("")
             }
         }

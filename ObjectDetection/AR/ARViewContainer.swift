@@ -12,13 +12,10 @@ import AVKit
 import CoreData
 
 struct ARViewContainer: UIViewRepresentable {
-
-    @Environment(\.managedObjectContext) var managedObjectContext
-    @Binding var sessionMessage: String
-    @Binding var isSessionActive: Bool
+    @ObservedObject var viewModel: ARViewModel
 
     let objectDetectionService = ObjectDetectionService()
-    let throttler = ThrottlerService(minimumDelay: 1, queue: .global(qos: .userInteractive))
+    let throttlerService = ThrottlerService(minimumDelay: 1, queue: .global(qos: .userInteractive))
     var sceneView = ARSCNView()
 
     func makeUIView(context: Context) -> ARSCNView {
@@ -32,14 +29,14 @@ struct ARViewContainer: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: ARSCNView, context: Context) {
-        if isSessionActive != context.coordinator.cachedIsSessionActive {
+        if viewModel.isARSessionActive != context.coordinator.cachedIsSessionActive {
             manageSession()
-            context.coordinator.cachedIsSessionActive = isSessionActive
+            context.coordinator.cachedIsSessionActive = viewModel.isARSessionActive
         }
     }
 
     func manageSession() {
-        if isSessionActive {
+        if viewModel.isARSessionActive {
             startSession()
         } else {
             stopSession()
@@ -68,12 +65,9 @@ struct ARViewContainer: UIViewRepresentable {
 
     func makeCoordinator() -> ARCoordinator {
         ARCoordinator(objectDetectionService: objectDetectionService,
-                    throttler: throttler,
-                    sceneView: sceneView,
-                    sessionMessage: $sessionMessage,
-                    isSessionActive: $isSessionActive,
-                    managedObjectContext: managedObjectContext)
+                      throttlerService: throttlerService,
+                      sceneView: sceneView,
+                      sessionMessage: $viewModel.sessionMessage,
+                      isSessionActive: $viewModel.isARSessionActive)
     }
 }
-
-

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct HistoryCellView: View {
+struct HistoryCell: View {
     
     var object: ScannedObject
     

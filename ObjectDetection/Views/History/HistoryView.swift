@@ -10,62 +10,38 @@ import CoreData
 
 struct HistoryView: View {
     
-    @Environment(\.managedObjectContext) private var managedObjectContext
-    @FetchRequest(sortDescriptors: [SortDescriptor(\.date, order: .reverse)]) var scannedObjects: FetchedResults<ScannedObject>
-
-    @State private var selectedObject: ScannedObject? = nil
-    @State private var errorMessage: String?
-    @State private var isShowingAlert = false
+    @StateObject private var viewModel = HistoryViewModel()
 
     var body: some View {
         NavigationView {
             List {
-                ForEach(scannedObjects) { object in
-                    HistoryCellView(object: object)
+                ForEach(viewModel.scannedObjects) { object in
+                    HistoryCell(object: object)
                         .listRowSeparator(.hidden)
                         .onTapGesture {
-                            self.selectedObject = object
+                            viewModel.selectObject(object)
                         }
                 }
                 .onDelete(perform: deleteObject)
             }
             .navigationTitle("Recent Scans")
             .listStyle(.plain)
-            .alert(isPresented: $isShowingAlert) {
+            .alert(isPresented: $viewModel.isShowingAlert) {
                 Alert(title: Text("Error"),
-                      message: Text(errorMessage ?? "An unknown error occurred"),
+                      message: Text(viewModel.errorMessage ?? "An unknown error occurred"),
                       dismissButton: .default(Text("OK")))
             }
             
-            if scannedObjects.isEmpty {
-                if managedObjectContext.hasChanges {
-                    ProgressView("Loading...")
-                } else {
-                    Text("No scans available").foregroundColor(.secondary)
-                }
+            if viewModel.scannedObjects.isEmpty {
+                Text("No scans available").foregroundColor(.secondary)
             }
         }
-        .sheet(item: $selectedObject, content: { item in
+        .sheet(item: $viewModel.selectedObject) { item in
             HistoryDetailView(object: item)
-        })
+        }
     }
 
     private func deleteObject(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { scannedObjects[$0] }
-                .forEach(managedObjectContext.delete)
-
-            do {
-                try managedObjectContext.save()
-            } catch {
-                let nsError = error as NSError
-                errorMessage = "Unresolved error: \(nsError), \(nsError.userInfo)"
-                isShowingAlert = true
-            }
-        }
+        viewModel.deleteObject(at: offsets)
     }
-}
-
-#Preview {
-    HistoryView()
 }

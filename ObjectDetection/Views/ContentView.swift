@@ -9,25 +9,23 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @State private var sessionMessage: String = "Looking for surfaces..."
-    @State private var isARSessionActive = true
+    @StateObject private var viewModel = ARViewModel()
 
     var body: some View {
         NavigationView {
             ZStack(alignment: .top) {
-                ARViewContainer(sessionMessage: $sessionMessage,
-                                isSessionActive: $isARSessionActive)
+                ARViewContainer(viewModel: viewModel)
                     .edgesIgnoringSafeArea(.all)
                     .onAppear {
-                        isARSessionActive = true
+                        viewModel.startSession()
                     }
                     .onDisappear {
-                        isARSessionActive = false
+                        viewModel.stopSession()
                     }
 
-                if !sessionMessage.isEmpty {
+                if !viewModel.sessionMessage.isEmpty {
                     withAnimation {
-                        MessageOverlay(message: sessionMessage)
+                        MessageOverlay(message: viewModel.sessionMessage)
                             .padding(.top, 25)
                             .transition(.opacity)
                     }
@@ -48,6 +46,7 @@ struct ContentView: View {
                 }
             }
         }
+        .environment(\.managedObjectContext, DataController.shared.viewContext)
     }
 }
 
